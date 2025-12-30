@@ -1,0 +1,527 @@
+{
+  "name": "lead qualification workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "lead qualification",
+        "formDescription": "It is a basic lead qualification system",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Full Name",
+              "placeholder": "Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Phone No",
+              "fieldType": "number",
+              "placeholder": "Phone"
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "placeholder": "Email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Budget",
+              "fieldType": "number",
+              "placeholder": "Budget",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Requirement",
+              "placeholder": "message",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Timeline",
+              "placeholder": "urgent/1 week/1month",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Company",
+              "placeholder": "company name"
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -176,
+        -112
+      ],
+      "id": "c04beae6-aeb2-49dd-9fce-c44efe958a9e",
+      "name": "On form submission",
+      "webhookId": "b14eee06-8596-44ba-a115-fef1dfc4fe7f"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cdaed13f-ed6b-4023-9a62-34d156e35066",
+              "name": "Full name",
+              "value": "={{ $json['Full Name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "6e31380a-2501-4721-90ee-812d1d5b429f",
+              "name": "Phone No",
+              "value": "={{ $json['Phone No'] }}",
+              "type": "number"
+            },
+            {
+              "id": "89860b78-7d33-4d12-93fc-0afe17bf6aca",
+              "name": "Email",
+              "value": "={{ $json.Email }}",
+              "type": "string"
+            },
+            {
+              "id": "0af29690-b0b9-4cbe-be01-455887415ffe",
+              "name": "budget",
+              "value": "={{ $json.Budget }}",
+              "type": "number"
+            },
+            {
+              "id": "01bbd7cd-6420-4fa9-9ff8-dd7f17c59a95",
+              "name": "Requirement",
+              "value": "={{ $json.Requirement }}",
+              "type": "string"
+            },
+            {
+              "id": "9e26e868-de4f-4954-be4f-3e2580387963",
+              "name": "Timeline",
+              "value": "={{ $json.Timeline }}",
+              "type": "string"
+            },
+            {
+              "id": "4472c842-4a54-43da-82a2-b081c4985ea5",
+              "name": "Company name",
+              "value": "={{ $json.Company }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        32,
+        -112
+      ],
+      "id": "ab5bf909-94db-4d4d-a26c-091b7a7166b0",
+      "name": "clean data"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Full Name: {{ $('clean data').item.json['Full name'] }}\nEmail: {{ $('clean data').item.json.Email }}\nPhone: {{ $('clean data').item.json['Phone No'] }}\nBudget: {{ $('clean data').item.json.budget }}\nTimeline: {{ $('clean data').item.json.Timeline }}\nRequirement: {{ $('clean data').item.json.Requirement }}\nCompany name:{{ $('clean data').item.json['Company name'] }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are an AI Lead Qualification Agent.\n\nAnalyze the lead details below and give me:\n\n- Lead Score (0–100)\n- Lead Quality (Hot, Warm, Cold) → Must follow rule:\n    If budget >= 10000 → \"Hot\"\n    If budget >= 5000 → \"Warm\"\n    Else → \"Cold\"\n- Budget Fit (Good, Okay, Low)-> Must follow rule:\n    If budget >= 10000 → \"Good\"\n    If budget >= 5000 → \"Okay\"\n    Else → \"Low\"\n- Urgency (High, Medium, Low)\n- Lead Category (Service / Product / Support / Other)\n- Summary (2–3 sentences)\n- Recommended Next Action (Call now / Email / Follow-up later)\n\nLead Info:\nName: {{ $('clean data').item.json['Full name'] }}\nEmail: {{ $('clean data').item.json.Email }}\nPhone: {{ $('clean data').item.json['Phone No'] }}\nBudget: {{ $('clean data').item.json.budget }}\nTimeline: {{ $('clean data').item.json.Timeline }}\nRequirement: {{ $('clean data').item.json.Requirement }} \nCompany name: {{ $('clean data').item.json['Company name'] }}\n\nIMPORTANT:\nLead Quality must be decided ONLY based on this rule:\n{{\n  $('clean data').item.json.budget >= 10000 ? \"Hot\" :\n  $('clean data').item.json.budget >= 5000 ? \"Warm\" :\n  \"Cold\"\n}}\nbudget fit must be decided only based on this rule:\n{{\n  $('clean data').item.json.budget >= 10000 ? \"Good\" :\n  $('clean data').item.json.budget >= 5000 ? \"okay\" :\n  \"low\"\n}}\n\nReturn output ONLY in this clean JSON:\n{\n  \"lead_score\": \"\",\n  \"lead_quality\": \"\",\n  \"budget_fit\": \"\",\n  \"urgency\": \"\",\n  \"category\": \"\",\n  \"summary\": \"\",\n  \"next_action\": \"\"\n}\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        752,
+        -128
+      ],
+      "id": "aa2d795a-ac3f-44cb-8e64-95b7a883c490",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        688,
+        128
+      ],
+      "id": "9bd47b88-6de8-46e9-bb3c-3dc83e4a7d40",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "2oUYMFzdTGrcyVSz",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n \"lead_score\": 85,\n \"lead_quality\": \"Hot\",\n \"budget_fit\": \"Good\",\n \"urgency\": \"High\",\n \"category\": \"Service\",\n \"summary\": \"Logaom Ajay is urgently looking for a lead qualification agent with a budget of 10,000 and a timeline of 1 week. This lead has a clear requirement and has provided complete contact information, indicating high intent and an immediate need for the service.\",\n \"next_action\": \"Call now\"\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        928,
+        128
+      ],
+      "id": "5f0ba792-7995-4b6f-8aaa-b278ab262e08",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1JwCpbOsdUO3pk4yzupEtzMIucldnZZIudakWU5fDV5k",
+          "mode": "list",
+          "cachedResultName": "lead qualification data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JwCpbOsdUO3pk4yzupEtzMIucldnZZIudakWU5fDV5k/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JwCpbOsdUO3pk4yzupEtzMIucldnZZIudakWU5fDV5k/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('clean data').item.json['Full name'] }}",
+            "Email": "={{ $('On form submission').item.json.Email }}",
+            "Phone": "={{ $('On form submission').item.json['Phone No'] }}",
+            "Budget": "={{ $('On form submission').item.json.Budget }}",
+            "Timeline": "={{ $('clean data').item.json.Timeline }}",
+            "Lead score": "={{ $json.output.lead_score }}",
+            "Lead quality": "={{ $json.output.lead_quality }}",
+            "Urgency": "={{ $json.output.urgency }}",
+            "Category": "={{ $json.output.category }}",
+            "Summay": "={{ $json.output.summary }}",
+            "Next action": "={{ $json.output.next_action }}",
+            "Created date": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Timeline",
+              "displayName": "Timeline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Lead score",
+              "displayName": "Lead score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Lead quality",
+              "displayName": "Lead quality",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Urgency",
+              "displayName": "Urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Summay",
+              "displayName": "Summay",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Next action",
+              "displayName": "Next action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Created date",
+              "displayName": "Created date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1136,
+        -128
+      ],
+      "id": "ca0d8f96-d266-4d30-a3c9-b8d906dfe578",
+      "name": "data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "CngNfLjv3yhPk0A2",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1JwCpbOsdUO3pk4yzupEtzMIucldnZZIudakWU5fDV5k",
+          "mode": "list",
+          "cachedResultName": "lead qualification data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JwCpbOsdUO3pk4yzupEtzMIucldnZZIudakWU5fDV5k/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JwCpbOsdUO3pk4yzupEtzMIucldnZZIudakWU5fDV5k/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Email",
+              "lookupValue": "={{ $json.Email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        256,
+        -112
+      ],
+      "id": "4e0a2461-5cfe-4a76-b324-9672e1df258a",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "CngNfLjv3yhPk0A2",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "35a1e278-336e-4390-9f9a-86f2a08e9335",
+              "leftValue": "={{ $json.keys().length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        464,
+        -112
+      ],
+      "id": "1040148d-17ad-415d-9017-5057c21bdcfe",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        304,
+        128
+      ],
+      "id": "dffd1d12-b724-46dc-bbd5-c86c2adf81dc",
+      "name": "No Operation, do nothing"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "clean data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "clean data": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "data": {
+      "main": [
+        []
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1d6230d3-80f8-41af-8801-e3be0980e389",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d87151403d351452df394358911a39738593a949d956229130c8ee7d3a821634"
+  },
+  "id": "mNMmNo8ZdFieWYvq",
+  "tags": []
+}
